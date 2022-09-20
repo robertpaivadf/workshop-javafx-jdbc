@@ -3,6 +3,7 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import application.Main;
 import gui.util.Alerts;
@@ -17,82 +18,63 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import model.services.DepartmentService;
 
-public class MainViewController implements Initializable{
-	
+public class MainViewController implements Initializable {
+
 	@FXML
 	private MenuItem menuItemSeller;
-	
+
 	@FXML
 	private MenuItem menuItemDepartment;
-	
+
 	@FXML
 	private MenuItem menuItemAbout;
-	
+
 	@FXML
 	public void onMenuItemSellerAction() {
 		System.out.println("onMenuItemSellerAction");
 	}
+
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadView2("/gui/DepartmentList.fxml");
-	}
-	@FXML
-	public void onMenuItemAboutAction() {		
-		loadView("/gui/About.fxml");
-	}
-	
-	@Override
-	public void initialize(URL uri, ResourceBundle rb) {	
-	}
-
-	private synchronized void loadView(String absolutName) {		
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutName));
-			VBox newVBox = loader.load(); //cria um novo VBox
-			
-			Scene mainScene = Main.getMainScene(); //pega a cena principal
-			VBox  mainVBox = ((VBox)((ScrollPane)mainScene.getRoot()).getContent()); //pega o vbox inicial
-			
-			Node mainMenu = mainVBox.getChildren().get(0); //pega o primeiro filho do VBox da janela principal
-			mainVBox.getChildren().clear(); //limpa o vbox pricipal
-			mainVBox.getChildren().add(mainMenu); //add o menu
-			mainVBox.getChildren().addAll(newVBox);	//add o novo vbox		
-			
-		} catch (IOException e) {
-			Alerts.showAlert("OI Exception", "Erro loading view", e.getMessage(), AlertType.ERROR);
-		}
-		//Scene mainScene = new Scene(scrollPane);
-		//primaryStage.setScene(mainScene);
-		//primaryStage.setTitle("Sample JavaFX application");
-		//primaryStage.show();
-	}
-	
-	private synchronized void loadView2(String absolutName) {		
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutName));
-			VBox newVBox = loader.load(); //cria um novo VBox
-			
-			Scene mainScene = Main.getMainScene(); //pega a cena principal
-			VBox  mainVBox = ((VBox)((ScrollPane)mainScene.getRoot()).getContent()); //pega o vbox inicial
-			
-			Node mainMenu = mainVBox.getChildren().get(0); //pega o primeiro filho do VBox da janela principal
-			mainVBox.getChildren().clear(); //limpa o vbox pricipal
-			mainVBox.getChildren().add(mainMenu); //add o menu
-			mainVBox.getChildren().addAll(newVBox);	//add o novo vbox	
-			
-			//atualiza a tableview
-			DepartmentListController controller = loader.getController();
+		loadView("/gui/DepartmentList.fxml", (DepartmentListController controller) -> {
 			controller.setDepartmentService(new DepartmentService());
 			controller.updateTableView();
+		});
+	}
+
+	@FXML
+	public void onMenuItemAboutAction() {
+		loadView("/gui/About.fxml", x -> {});
+	}
+
+	@Override
+	public void initialize(URL uri, ResourceBundle rb) {
+	}
+
+	private synchronized <T> void  loadView(String absolutName, Consumer<T> initializingAction) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutName));
+			VBox newVBox = loader.load(); // cria um novo VBox
+
+			Scene mainScene = Main.getMainScene(); // pega a cena principal
+			VBox mainVBox = ((VBox) ((ScrollPane) mainScene.getRoot()).getContent()); // pega o vbox inicial
+
+			Node mainMenu = mainVBox.getChildren().get(0); // pega o primeiro filho do VBox da janela principal
+			mainVBox.getChildren().clear(); // limpa o vbox pricipal
+			mainVBox.getChildren().add(mainMenu); // add o menu
+			mainVBox.getChildren().addAll(newVBox); // add o novo vbox
 			
+			//executa a função que for passada como parâmetro (expressão Lambda)
+			T controller = loader.getController();
+			initializingAction.accept(controller);
+
 		} catch (IOException e) {
 			Alerts.showAlert("OI Exception", "Erro loading view", e.getMessage(), AlertType.ERROR);
 		}
-		//Scene mainScene = new Scene(scrollPane);
-		//primaryStage.setScene(mainScene);
-		//primaryStage.setTitle("Sample JavaFX application");
-		//primaryStage.show();
+		// Scene mainScene = new Scene(scrollPane);
+		// primaryStage.setScene(mainScene);
+		// primaryStage.setTitle("Sample JavaFX application");
+		// primaryStage.show();
 	}
-	
-	
+
 }
