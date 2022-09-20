@@ -11,4 +11,13 @@ public class Utils {
 		//por exemplo se clicar num botão pega o Stage daquele botão
 	}
 	
+	
+	public static Integer tryParseToInt(String str) {
+		try {
+			return Integer.parseInt(str);
+		}catch (NumberFormatException e) {
+			return null;
+		}
+	}
+	
 }
