@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 public class MainViewController implements Initializable{
 	
@@ -33,7 +34,7 @@ public class MainViewController implements Initializable{
 	}
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml");
+		loadView2("/gui/DepartmentList.fxml");
 	}
 	@FXML
 	public void onMenuItemAboutAction() {		
@@ -56,6 +57,33 @@ public class MainViewController implements Initializable{
 			mainVBox.getChildren().clear(); //limpa o vbox pricipal
 			mainVBox.getChildren().add(mainMenu); //add o menu
 			mainVBox.getChildren().addAll(newVBox);	//add o novo vbox		
+			
+		} catch (IOException e) {
+			Alerts.showAlert("OI Exception", "Erro loading view", e.getMessage(), AlertType.ERROR);
+		}
+		//Scene mainScene = new Scene(scrollPane);
+		//primaryStage.setScene(mainScene);
+		//primaryStage.setTitle("Sample JavaFX application");
+		//primaryStage.show();
+	}
+	
+	private synchronized void loadView2(String absolutName) {		
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutName));
+			VBox newVBox = loader.load(); //cria um novo VBox
+			
+			Scene mainScene = Main.getMainScene(); //pega a cena principal
+			VBox  mainVBox = ((VBox)((ScrollPane)mainScene.getRoot()).getContent()); //pega o vbox inicial
+			
+			Node mainMenu = mainVBox.getChildren().get(0); //pega o primeiro filho do VBox da janela principal
+			mainVBox.getChildren().clear(); //limpa o vbox pricipal
+			mainVBox.getChildren().add(mainMenu); //add o menu
+			mainVBox.getChildren().addAll(newVBox);	//add o novo vbox	
+			
+			//atualiza a tableview
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
 			
 		} catch (IOException e) {
 			Alerts.showAlert("OI Exception", "Erro loading view", e.getMessage(), AlertType.ERROR);
