@@ -31,11 +31,12 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Seller;
+import model.services.DepartmentService;
 import model.services.SellerService;
 
 public class SellerListController implements Initializable, DataChangeListener {
 
-	private SellerService service;
+	private SellerService sellerService;
 
 	@FXML
 	private TableView<Seller> tableViewSeller;
@@ -79,8 +80,8 @@ public class SellerListController implements Initializable, DataChangeListener {
 
 	}
 
-	public void setSellerService(SellerService service) {
-		this.service = service;
+	public void setSellerService(SellerService sellerService) {
+		this.sellerService = sellerService;
 	}
 
 	private void initializeNodes() {
@@ -98,10 +99,10 @@ public class SellerListController implements Initializable, DataChangeListener {
 	}
 
 	public void updateTableView() {
-		if (service == null) {
+		if (sellerService == null) {
 			throw new IllegalStateException("Service was null");
 		}
-		List<Seller> list = service.findAll();
+		List<Seller> list = sellerService.findAll();
 		obsList = FXCollections.observableList(list);
 		tableViewSeller.setItems(obsList);
 		initEditButtons();
@@ -115,7 +116,8 @@ public class SellerListController implements Initializable, DataChangeListener {
 
 			SellerFormController controller = loader.getController();
 			controller.setSeller(obj);
-			controller.setSellerService(new SellerService());
+			controller.setServices(new SellerService(), new DepartmentService());
+			controller.loadAssociatedObjects();//carregar os departamentos do BD
 			controller.subscribeDataChangeListener(this);
 			controller.updateFormData();
 
@@ -128,6 +130,7 @@ public class SellerListController implements Initializable, DataChangeListener {
 			dialogStage.showAndWait();
 
 		} catch (IOException e) {
+			e.printStackTrace();
 			Alerts.showAlert("IOException", "Error loading view", e.getMessage(), AlertType.ERROR);
 		}
 	}
@@ -178,11 +181,11 @@ public class SellerListController implements Initializable, DataChangeListener {
 		Optional<ButtonType> result = Alerts.showConfirmation("Confirmação",
 				"Tem certeza que quer deletar " + obj.getName());
 		if (result.get() == ButtonType.OK) {
-			if (service == null) {
+			if (sellerService == null) {
 				throw new IllegalStateException("Service was null");
 			}
 			try {
-				service.remove(obj);
+				sellerService.remove(obj);
 				updateTableView();
 			} catch (DbIntegrityException e) {
 				Alerts.showAlert("Error removing object", null, e.getMessage(), AlertType.ERROR);
