@@ -1,0 +1,26 @@
+Building JAR file
+Checklist:
+ Build JAR file
+o Right click project name -> Export -> Java/Runnable JAR file -> Next
+o Select Main class
+o Select destination folder
+o Library handling: 3rd option
+ Pack files
+o JAR file
+o db.properties
+o MySQL Connector
+o JavaFX SDK
+o Java SDK
+
+
+Instalation
+Checklist:
+ Install Java: https://www.oracle.com/technetwork/java/javase/downloads/index.html
+o Setup JAVA_HOME (ex: C:\Program Files\Java\jdk-11.0.3)
+ Copy JavaFX
+o Setup PATH_TO_FX (ex: C:\java-libs\javafx-sdk\lib)
+o Place MySQL Connector in lib folder
+ Copy JAR & db.properties
+Run app:
+java --module-path %PATH_TO_FX% --add-modules javafx.controls,javafx.fxml -cp myapp.jar
+application.Main 
